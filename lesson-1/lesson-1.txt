@@ -1,20 +1,149 @@
-use osetrov
+1. Працюємо в консолі, а не в цьому файлі
+    - створюємо колекцію:
+            use osetrov - і тиснемо Ctrl+Enter.
+
+2. Наповнюємо колекцію. Вставляємо в консоль наступну команду замість попередньої і тиснемо - виконати; після перевірки
+- можна видалити дані
+///////////////////////////// file collection ////////////////
+db.users.insertMany([
+    {
+        name: 'Alex', age: 25, gender: 'male', address: {
+            city: 'Lviv',
+            street: 'Chornovola',
+            house: 25,
+            flat: 12
+        },
+        parents: [
+            'Vasia',
+            'Masha',
+        ],
+        rating: 5,
+        studying: ['js','java']
+    },
+    {
+        name: 'Natalii', age: 29, gender: 'female', address: {
+            city: 'Lviv',
+            street: 'Marko Vovchok',
+            house: 45,
+            flat: 45
+        },
+        parents: [
+            'Igor',
+            'Nina',
+        ],
+        rating: 4,
+        studying: ['python','java', 'css']
+    },
+    {
+        name: 'Alexsandr', age: 34, gender: 'male', address: {
+            city: 'Lviv',
+            street: 'Kitayska',
+            house: 10,
+            flat: 5
+        },
+        parents: [
+            'Petro',
+            'Alina',
+        ],
+        rating: 2,
+        studying: ['js','java','html']
+    },
+    {
+        name: 'Sergii', age: 12, gender: 'male',
+        parents: [
+            'Anton',
+            'Tamara',
+        ],
+        rating: 4,
+        studying: ['node','java', 'css','mongo','mysql']
+    },
+    {
+        name: 'Igor', age: 45, gender: 'male', address: {
+            city: 'Kyiv',
+            street: 'Shevchenko',
+            house: 100,
+            flat: 66
+        },
+        parents: [
+            'Igor',
+            'Igor',
+        ],
+        rating: 5,
+        studying: ['java','node']
+    },
+    {
+        name: 'Eva', age: 26, gender: 'female', address: {
+            city: 'Odessa',
+            street: 'Derebasovska',
+            house: 4,
+        },
+        parents: [
+            'Masha'
+        ],
+        rating: 2,
+        studying: ['js']
+    },
+    {
+        name: 'Kira', age: 49, gender: 'female', address: {
+            city: 'Uzgorod',
+            street: 'Doroshenka',
+            house: 201,
+            flat: 1
+        },
+        parents: [
+            'Vitaliy',
+            'Olha',
+        ],
+        rating: 2,
+        studying: ['java']
+    },
+    {
+        name: 'Vova', age: 16, gender: 'male', address: {
+            city: 'Uzgorod',
+            street: 'Bethoven',
+            house: 2,
+            flat: 145
+        },
+        rating: 3
+    }
+
+])
+
+\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+
+3. Налаштовуємо зручний інтерфейс для роботи:
+        - знизу вибираємо json
+        - де око - text
+        - де 3 крапки в налаштуванняз -> move to -> right top
+        - зверху прибираємо галочку на Show Services Tree
 
 
+4. Лекція 1. Матеріал з коментарями
+
+    -   регістр має значення! А ... а ...!
+
+// Знаходить всі записи в колекції `users`.
 db.users.find({})
+
+// Знаходить записи в колекції `users`, де поле `name` має значення 'Alex'.
 db.users.find({name:'Alex'})
 
+// Додає новий документ у колекцію `users` з полями `car`, `model` і `year`.
 db.users.insertOne({car:'BMW', model:'s3', year:2005})
 
+// Знаходить запис з вказаним `_id` в колекції `users`.
 db.users.find({_id:ObjectId('661d5a39e26eea6939c8d959')})
 
+// Знаходить записи в колекції `users`, де поле `gender` має значення 'female' і поле `rating` має значення 2.
 db.users.find({gender:'female', rating:2})
 
+// Знаходить та повертає лише поля `_id`, `name` і `gender` для записів, де поле `gender` має значення 'female' і поле `rating` має значення 2.
 db.users.find(
     {gender:'female', rating:2},
     {_id:1, name:1, gender:1}
 )
 
+// Знаходить записи в колекції `users`, де поле `age` дорівнює 12 і поле `gender` має значення 'male'.
 db.users.find({
     $and:[
         {age:12},
@@ -22,6 +151,7 @@ db.users.find({
     ]
 })
 
+// Знаходить записи в колекції `users`, де поле `age` дорівнює 12 або поле `rating` має значення 2.
 db.users.find({
     $or:[
         {age:12},
@@ -29,9 +159,13 @@ db.users.find({
     ]
 })
 
+// Знаходить записи в колекції `users`, де поле `age` міститься в масиві [12,55,35,25,11,18].
 db.users.find({age:{$in:[12,55,35,25,11,18]}})
+
+// Знаходить записи в колекції `users`, де поле `age` не міститься в масиві [12,55,35,25,11,18].
 db.users.find({age:{$nin:[12,55,35,25,11,18]}})
 
+// Знаходить записи в колекції `users`, де поле `age` не міститься в масиві [12,55,35,25,11,18].
 db.users.find({
     age:{
         $not:{
@@ -40,73 +174,126 @@ db.users.find({
     }
 })
 
+// Знаходить записи в колекції `users`, де поле `rating` більше 2.
 db.users.find({rating:{$gt:2}})
+
+// Знаходить записи в колекції `users`, де поле `rating` менше 3.
 db.users.find({rating:{$lt:3}})
+
+// Знаходить записи в колекції `users`, де поле `rating` більше або дорівнює 3.
 db.users.find({rating:{$gte:3}})
+
+// Знаходить записи в колекції `users`, де поле `rating` менше або дорівнює 3.
 db.users.find({rating:{$lte:3}})
+
+// Знаходить записи в колекції `users`, де поле `rating` не дорівнює 3.
 db.users.find({rating:{$ne:3}})
+
+// Знаходить записи в колекції `users`, де поле `rating` дорівнює 3.
 db.users.find({rating:{$eq:3}})
 
 
+// Знаходить записи в колекції `users`, де поле `name` має значення 'Kira'.
 db.users.find({name:'Kira'})
+
+// Знаходить записи в колекції `users`, де поле `name` починається з букви 'a' (без врахування регістру).
 db.users.find({name:/^a/i})
+
+// Знаходить записи в колекції `users`, де поле `name` закінчується на букву 'a' (без врахування регістру).
 db.users.find({name:/a$/i})
+
+// Знаходить записи в колекції `users`, де поле `name` містить принаймні дві букви та закінчується на 't' (без врахування регістру).
 db.users.find({name:/.{2}t/i})
+
+// Знаходить записи в колекції `users`, де поле `name` починається з 'k' і закінчується на 'a' (без врахування регістру).
 db.users.find({name:/^k.*a$/i})
+
+// Знаходить записи в колекції `users`, де поле `name` містить букву 'v' (без врахування регістру).
 db.users.find({name:/v/i})
 
 
+// Знаходить всі записи в колекції `users` і сортує їх за зростанням поля `rating`.
 db.users.find().sort({rating:1})
+
+// Знаходить всі записи в колекції `users` і сортує їх за спаданням поля `rating`.
 db.users.find().sort({rating:-1})
+
+// Знаходить всі записи в колекції `users` і сортує їх за спаданням поля `rating`, а в разі рівних значень - за спаданням поля `age`.
 db.users.find().sort({rating:-1, age:-1})
+
+// Знаходить всі записи в колекції `users`, сортує їх за спаданням поля `rating`, а в разі рівних значень - за спаданням поля `age`, та обмежує кількість результатів до 2.
 db.users.find().sort({rating:-1, age:-1}).limit(2)
+
+// Знаходить всі записи в колекції `users`, сортує їх за спаданням поля `rating`, а в разі рівних значень - за спаданням поля `age`, обмежує кількість результатів до 2, та пропускає перші 4 результати.
 db.users.find().sort({rating:-1, age:-1}).limit(2).skip(4)
 
+
+// Оновлює перший знайдений документ в колекції `users` з вказаним `_id`, встановлюючи поле `rating` в значення null.
 db.users.updateOne(
     {_id:ObjectId('661d5a39e26eea6939c8d958')},
     {$set:{rating:null}}
 )
+
+// Оновлює перший знайдений документ в колекції `users` з вказаним `_id`, видаляючи поле `rating`, якщо воно дорівнює 55.
 db.users.updateOne(
     {_id:ObjectId('661d5a39e26eea6939c8d958')},
     {$unset:{rating:55}}
 )
 
-
+// Знаходить документ в колекції `users` з вказаним `_id`.
 db.users.find({_id:ObjectId('661d5a39e26eea6939c8d958')})
 
+// Оновлює всі документи в колекції `users`, де поле `gender` має значення 'male', встановлюючи його в 'animal'.
 db.users.updateMany(
     {gender:'male'},
     {$set:{gender:'animal'}}
 )
 
-
+// Знаходить всі документи в колекції `users`, де в полі `address.city` вказане значення 'Lviv'.
 db.users.find({'address.city':'Lviv'})
+
+// Знаходить всі документи в колекції `users`, де вказано значення 'js' в полі `studying`.
 db.users.find({studying:'js'})
 
+// Знаходить всі документи в колекції `users`, де відсутнє поле `rating`.
 db.users.find({rating:{$exists:0}})
+
+// Знаходить всі документи в колекції `users`, де відсутнє поле `parents`.
 db.users.find({parents:{$exists:0}})
+
+// Знаходить всі документи в колекції `users`, де поле `rating` має значення null.
 db.users.find({rating:null})
 
-
+// Оновлює всі документи в колекції `users`, де присутнє поле `parents`, встановлюючи його значення на 'Karina'.
 db.users.updateMany(
     {parents:{$exists:1}},
     {$set:{'parents.$[]':'Karina'}}
 )
 
+// Знаходить всі документи в колекції `users`.
 db.users.find({})
 
+// Оновлює перший знайдений документ в колекції `users` з вказаним `_id`, додаючи значення 'python' до масиву `studying`.
 db.users.updateOne(
     {_id:ObjectId('661d5a39e26eea6939c8d952')},
     {$push:{studying:'python'}}
 )
+
+// Знаходить всі документи в колекції `users`, де поле `studying` містить два елементи.
 db.users.find({studying:{$size:2}})
 
+// Вставляє кілька нових документів у колекцію `users`.
 db.users.insertMany([
     {asd:12, age:55},
     {eee:12, age:55},
     {auuusd:12, age:55},
 ])
 
+// Видаляє один документ з вказаним `_id` з колекції `users`.
 db.users.deleteOne({_id:ObjectId('661d6491e26eea6939c8d960')})
+
+// Видаляє один документ з вказаним `_id` з колекції `users`.
 db.users.deleteOne({_id:ObjectId('661d6491e26eea6939c8d95f')})
+
+// Видаляє один документ з вказаним `_id` з колекції `users`.
 db.users.deleteOne({_id:ObjectId('661d5bdbe26eea6939c8d95d')})
