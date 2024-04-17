@@ -1,0 +1,107 @@
+- Спочатку запускаємо використання бази даних:
+    use osetrov
+- наповнюємо її колекцією юзерів з hw-1-damp
+    і перевіряємо
+        db.users.find()  // Ctrl+Enter
+- Виконуємо завдання:
+
+
+// 1) Знайти всіх юзерів в кого вік менше за 20
+db.users.find({
+    age:{$lt:20}
+})
+
+// 2) Знайти всіх юзерів в котрих хоча б один з батьків Tamara або Petro
+db.users.find({
+    parents:{$in:[
+        'Tamara', 'Petro']}
+})
+
+// або
+db.users.find({
+    $or:[
+                {parents:'Tamara'},
+                {parents:'Petro'}
+            ]
+})
+
+
+
+// 3) Знайти всіх юзерів які вивчають js
+db.users.find(
+    {studying: 'js'}
+    )
+
+// 4) Знайти всіх юзерів котрі вивчають тільки один предмет и додати їм java
+db.users.updateMany(
+    { studying: { $size: 1 } }, // Вибираємо користувачів, які вивчають тільки один предмет
+    { $addToSet: { studying: 'java' } } // Додаємо 'java' до списку предметів, які вони вивчають
+    )
+
+        // або
+    db.users.updateMany(
+        {
+           studying:{$size:1}
+        },
+        {$push:{studying:'java'}}
+    )
+// 5) Знайти всіх юзерів номера будинків яких знаходяться в межах 1-20
+db.users.find({
+    "address.house":{$gt:1, $lt:20}
+})
+
+// 6) Знайти всіх юзерів в яких назва вулиці містить пробіл
+db.users.find({
+    "address.street":/ /
+})
+
+//або
+db.users.find(
+    {
+//         'address.street':/.* .*/
+        'address.street':/.*\s.*/
+    }
+)
+
+
+// 7) Видалити всіх юзерів в котрих немає поля studying
+db.users.deleteMany({
+    studying:{$exists:false}
+})
+
+//або
+db.users.deleteMany({studying:null})
+
+
+// 8) Знайти всіх юзерів в котрих в ім'я когось с батьків закінчується на 'na'
+db.users.find({'parents':/na$/})
+
+
+// 9) Всім юзерам котрі не вивчають python додати його
+db.users.updateMany(
+    {studying: {$ne: 'python'}},
+    {$push: {studying: 'python'}}  // які не вивчають мову програмування "python".
+    )
+
+db.users.updateMany(
+    {studying: {$ne: 'python'}},
+    {$addToSet: {studying: 'python'}}  // які не мають "python" у своєму списку предметів вивчення.
+    )
+
+
+db.users.updateMany(
+    { studying: { $not: { $in: ['python'] } } },
+    { $push: { studying: 'python' } }  //  які не вивчають мову програмування "python".
+    )
+
+// видалити всі python з вивчення
+db.users.updateMany(
+    { studying: { $in: ['python'] } },
+    { $pullAll: { studying: ['python'] } } // $pullAll - всі значення, $pull - перше входження
+    )
+
+
+// 10) Посортувати юзерів по рейтингу та по номеру квартири (що то що то, від більшого меншого)
+db.users.find().sort({
+    rating:-1, "address.flat":-1
+})
