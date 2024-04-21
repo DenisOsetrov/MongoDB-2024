@@ -8,6 +8,138 @@
 
 === Лекція №2 ===
 
+// Отримання всіх записів з колекції "students"
+db.students.find()
+
+// Отримання всіх записів з колекції "teacher"
+db.teacher.find()
+
+// Агрегація вчителів для групування за предметом уроку
+db.teacher.aggregate([
+    {
+        $group: {
+            _id: '$lesson'
+        }
+    }
+])
+
+// Агрегація вчителів для обчислення різних метрик по предметах
+db.teacher.aggregate([
+    {
+        $group: {
+            _id: '$lesson',
+            minPayment: {$min: '$payment'},
+            maxPayment: {$max: '$payment'},
+            avgPayment: {$avg: '$payment'},
+            countOfTeachers: {$sum: 1},
+            countOfDoubleTeachers: {$sum: 2},
+            sum: {$sum: '$payment'}
+        }
+    },
+    {
+        $match: {
+            minPayment: {$lt: 2500} // Фільтруємо записи за мінімальною оплатою менше 2500
+        }
+    },
+    {
+        $sort: {
+            sum: -1 // Сортуємо за сумою у зворотньому порядку
+        }
+    },
+    {
+        $project: {
+            _id: 0,
+            myLesson: '$_id', // Перейменовуємо "_id" на "myLesson"
+            minPayment:1,
+            maxPayment: 1,
+            avgPayment: 1,
+            countOfTeachers: 1,
+            countOfDoubleTeachers: 1,
+            sum: 1
+        }
+    }
+])
+
+// Агрегація вчителів для пошуку вчителів, які кураторують класи вище 4
+db.teacher.aggregate([
+    {
+        $match:{
+            class_curator:{$gt:4} // Фільтруємо за класом куратора вище 4
+        }
+    },
+    {
+        $lookup:{
+            from:'students', // Пошук учнів зі студентів
+            localField:'class_curator',
+            foreignField:'class',
+            as:'myStudents' // Поле результату з'єднання
+        }
+    },
+    {
+        $match:{
+            'myStudents._id':{$exists:1} // Фільтруємо результати, де є принаймні один учень
+        }
+    }
+])
+
+// Агрегація вчителів з пропуском перших 4 записів та обмеженням результатів до 2
+db.teacher.aggregate([
+    {
+        $match:{
+            class_curator:{$gt:4} // Фільтруємо за класом куратора вище 4
+        },
+    },
+    {
+        $skip:4 // Пропускаємо перші 4 записи
+    },
+    {
+        $limit:2 // Обмежуємо результати до 2
+    },
+])
 
 
+// Підрахунок кількості батьків-лікарів серед учнів, котрі навчаються під керівництвом вчителя-куратора
+db.teacher.aggregate([
+    {
+        $lookup:{
+            from:'students',
+            localField:'class_curator',
+            foreignField:'class',
+            as:'myStudents'
+        }
+    },
+    {
+        $unwind:'$myStudents' // Розгортаємо масив учнів
+    },
+    {
+        $unwind: '$myStudents.parents' // Розгортаємо масив батьків кожного учня
+    },
+    {
+        $match:{
+            'myStudents.parents.profession':'doctor' // Фільтруємо за професією "лікар"
+        }
+    },
+    {
+        $count:'doctorsCount' // Підраховуємо кількість результатів
+    }
+])
+
+// Агрегація студентів з додаванням поля довжини імені, фільтрацією за довжиною імені та вибіркою полів для виводу
+db.students.aggregate([
+    {
+        $addFields:{
+            nameLength:{$strLenCP:'$name'} // Додаємо поле з довжиною імені
+        }
+    },
+    {
+        $match:{
+            nameLength:4 // Фільтруємо за довжиною імені 4 символи
+        }
+    },
+    {
+        $project:{
+            nameLength:0 // Вибираємо всі поля крім поля з довжиною імені для виводу
+        }
+    }
+])
 
