@@ -32,6 +32,26 @@ db.students.updateOne(
     {$push:{lessons:'python'}}
 )
 
+
+// дізнатися кількість предметів у масиві lessons для певного студента
+db.students.aggregate([
+    {
+        $match: { _id: ObjectId("662218f2fbc5ca67c6439535") } // Фільтр за унікальним ідентифікатором студента
+    },
+    {
+        $project: {
+            numberOfLessons: { $size: "$lessons" } // Додаємо нове поле numberOfLessons з кількістю предметів в масиві lessons
+        }
+    }
+])
+
+// видалити елемент з масиву - всі python
+db.students.updateOne(
+    { _id: ObjectId("662218f2fbc5ca67c6439535") }, // Фільтр за унікальним ідентифікатором студента
+    { $pull: { lessons: 'python' } } // Видалення елементу 'python' з масиву lessons
+    )
+
+
 // Додавання масиву предметів ['java', 'js'] студенту з певним _id
 db.students.updateOne(
     {_id:ObjectId('661ff9d5119a1630747ecdb3')},
@@ -43,6 +63,7 @@ db.students.updateOne(
     {_id:ObjectId('661ff9d5119a1630747ecdb3')},
     {$push:{lessons:{$each:['js', 'docker']}}}
 )
+
 
 // Видалення масиву предметів ["java", "js"] студенту з певним _id
 db.students.updateOne(
@@ -57,10 +78,13 @@ db.students.updateOne(
 )
 
 // Видалення другого предмету студенту з певним _id
+    // $unset - видаляє все поле, тому будемо понкретизувати! lessons.1 - вказуємо індекс масиву, друга 1 - true
+    (підтверджуємо видалення)
 db.students.updateOne(
     {_id:ObjectId('661ff9d5119a1630747ecdb3')},
-    {$unset:{'lessons.1':1}}
+    {$unset:{'lessons.1':1}}  //  "lessons": ["english", null, "python", null, null] - тепер через pull видаляємо null
 )
+
 
 // Видалення всіх null значень у масиві предметів студента з певним _id
 db.students.updateOne(
@@ -87,11 +111,18 @@ db.students.updateOne(
     {$addToSet:{lessons:{$each:['js', 'python', 'css']}}}
 )
 
+// Додавання тільки унікальних значень
+db.students.updateOne({
+    _id: ObjectId('662218f2fbc5ca67c6439535')},
+    {$addToSet: {lessons: 'job'}
+})
+
+
 // Оновлення професії батьків студентів, якщо вона не визначена, на "waiter"
 db.students.updateMany(
-    {parents:{$exists:1}, "parents.profession":null},
-    {$set:{'parents.$[item].profession':'waiter'}},
-    {'arrayFilters':[{'item.profession':null}]}
+    {parents:{$exists:1}, "parents.profession":null},   // Це фільтр, який обмежує вибірку записів. Вона вибирає записи, де є поле parents, і для цього поля значення profession є null.
+    {$set:{'parents.$[item].profession':'waiter'}},    // Це операція встановлення значення. Вона встановлює значення profession на waiter для всіх об'єктів parents, які задовольняють умову фільтрації. Однак, вона встановлює значення тільки для елементів, що задовольняють умову масивного фільтру (array filter).
+    {'arrayFilters':[{'item.profession':null}]}        // Цей параметр вказує на те, як саме відбувається фільтрація масиву parents. В даному випадку, він вказує, що потрібно вибрати ті елементи масиву parents, де значення profession є null, і встановити для них значення waiter.
 )
 
 // Підрахунок загальної кількості батьків у всіх студентів
@@ -106,5 +137,12 @@ db.students.aggregate([
             _id:'',
             sum:{$sum:'$countOfParents'}
         }
-    }
+    },
+        // і щоб виводило лише потрібний результат можна додати ще 1 умову виводу
+     {
+            $project: {
+                _id: 0,
+                sum: 1
+            }
+        }
 ])
