@@ -42,11 +42,11 @@ db.teacher.aggregate([
 db.teacher.aggregate([
     {
         $group: {
-            _id: '$lesson',
+            _id: '$lesson',                    // групує за полем lesson, а _id: null - об'єднати всі документи без будь-якого групування
             minPayment: {$min: '$payment'},
             maxPayment: {$max: '$payment'},
             avgPayment: {$avg: '$payment'},
-            countOfTeachers: {$sum: 1},
+            countOfTeachers: {$sum: 1},        // де 1 - це не true, а множник. Тобто, рахуємо усі і * на 1
             countOfDoubleTeachers: {$sum: 2},
             sum: {$sum: '$payment'}
         }
@@ -75,6 +75,23 @@ db.teacher.aggregate([
     }
 ])
 
+
+
+// З'єднання двох колекцій через оператор $lookup
+// В колекції вчителів створюємо масив учнів [myClass], в яких викладає цей вчитель, з'єднавши дві колекції: вчителі та
+студенти.
+db.teacher.aggregate([
+    {
+        $lookup: {
+            from: 'students',
+            localField: 'class_curator',
+            foreignField: 'class',
+            as: 'myClass'
+        }
+    }
+])
+
+
 // Агрегація вчителів для пошуку вчителів, які кураторують класи вище 4
 db.teacher.aggregate([
     {
@@ -84,10 +101,10 @@ db.teacher.aggregate([
     },
     {
         $lookup:{
-            from:'students', // Пошук учнів зі студентів
-            localField:'class_curator',
-            foreignField:'class',
-            as:'myStudents' // Поле результату з'єднання
+            from:'students',              // Пошук учнів зі студентів
+            localField:'class_curator',   // Поле з teachers
+            foreignField:'class',         // Поле зі students
+            as:'myStudents'               // Поле результату з'єднання
         }
     },
     {

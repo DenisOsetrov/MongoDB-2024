@@ -18,6 +18,15 @@ db.students.find({avgScore:{$gt:4}})
 
 // 6) Знайти найкращого учня
 db.students.find().sort({avgScore: -1}).limit(1)
+// або через агрегатну ф-цію
+db.students.aggregate([
+    {
+        $sort: { avgScore: -1 } // Сортуємо учнів за спаданням середнього балу
+    },
+    {
+        $limit: 1 // Вибираємо лише перший (найбільший) результат
+    }
+])
 
 // 7) Знайти найгіршого учня
 db.students.find().sort({avgScore: 1}).limit(1)
